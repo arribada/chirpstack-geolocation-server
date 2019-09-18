@@ -20,7 +20,7 @@ var version string
 var rootCmd = &cobra.Command{
 	Use:   "lora-geo-server",
 	Short: "LoRa Geo Server for LoRa Server",
-	Long: `LoRa Geolocation Server provides geolocation services for LoRa Server
+	Long: `LoRa Geo Server provides geolocation services for LoRa Server
 	> documentation & support: https://www.loraserver.io/lora-geo-server/
 	> source & copyright information: https://github.com/brocaar/lora-geo-server/`,
 	RunE: run,
@@ -37,10 +37,12 @@ func init() {
 	viper.SetDefault("geo_server.api.bind", "0.0.0.0:8005")
 	viper.SetDefault("geo_server.backend.type", "collos")
 	viper.SetDefault("geo_server.backend.collos.request_timeout", time.Second)
+	viper.SetDefault("geo_server.backend.lora_cloud.request_timeout", time.Second)
 
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(configfileCmd)
 	rootCmd.AddCommand(testResolveTDOA)
+	rootCmd.AddCommand(testResolveMultiFrameTDOA)
 }
 
 // Execute executes the root command.

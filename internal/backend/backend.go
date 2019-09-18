@@ -10,6 +10,7 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -17,6 +18,7 @@ import (
 
 	"github.com/brocaar/lora-geo-server/internal/backend/collos"
 	"github.com/brocaar/lora-geo-server/internal/backend/logger"
+	"github.com/brocaar/lora-geo-server/internal/backend/loracloud"
 	"github.com/brocaar/lora-geo-server/internal/config"
 	"github.com/brocaar/loraserver/api/geo"
 )
@@ -28,6 +30,8 @@ func Setup(c config.Config) error {
 	switch c.GeoServer.Backend.Type {
 	case "collos":
 		b, err = collos.NewBackend(c)
+	case "lora_cloud":
+		b, err = loracloud.NewBackend(c)
 	default:
 		return fmt.Errorf("unknown backend: %s", c.GeoServer.Backend.Type)
 	}
@@ -89,10 +93,12 @@ func gRPCLoggingServerOptions() []grpc.ServerOption {
 		grpc_middleware.WithUnaryServerChain(
 			grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 			grpc_logrus.UnaryServerInterceptor(logrusEntry, logrusOpts...),
+			grpc_prometheus.UnaryServerInterceptor,
 		),
 		grpc_middleware.WithStreamServerChain(
 			grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 			grpc_logrus.StreamServerInterceptor(logrusEntry, logrusOpts...),
+			grpc_prometheus.StreamServerInterceptor,
 		),
 	}
 }

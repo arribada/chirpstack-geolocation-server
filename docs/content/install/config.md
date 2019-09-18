@@ -23,10 +23,11 @@ Usage:
   lora-geo-server [command]
 
 Available Commands:
-  configfile        Print the LoRa Geolocation Server configuration file
-  help              Help about any command
-  test-resolve-tdoa Runs the given resolve TDOA test-suite file (json)
-  version           Print the LoRa Geo Server version
+  configfile                    Print the LoRa Geolocation Server configuration file
+  help                          Help about any command
+  test-resolve-multi-frame-tdoa Runs the resolve multi-frame TDOA request from the given directory
+  test-resolve-tdoa             Runs the resolve TDOA request from the given directory
+  version                       Print the LoRa Geo Server version
 
 Flags:
   -c, --config string   path to configuration file (optional)
@@ -92,22 +93,65 @@ log_level=4
 
   # Geolocation backend configuration.
   [geo_server.backend]
-  # Name.
+  # Type.
   #
-  # The name of the geolocation backend to use.
-  name="collos"
+  # The backend type to use.
+  type="collos"
 
-  [geo_server.backend.collos]
-  # Collos subscription key.
+  # Request log directory.
   #
-  # This key can be retrieved after creating a Collos account at:
-  # http://preview.collos.org/
-  subscription_key=""
+  # Logging requests can be used to "replay" geolocation requests and to compare
+  # different geolocation backends. When left blank, logging will be disabled.
+  request_log_dir=""
 
-  # Request timeout.
-  #
-  # This defines the request timeout when making calls to the Collos API.
-  request_timeout="1s"
+    # Collos backend.
+    [geo_server.backend.collos]
+    # Collos subscription key.
+    #
+    # This key can be retrieved after creating a Collos account at:
+    # http://preview.collos.org/
+    subscription_key=""
+
+    # Request timeout.
+    #
+    # This defines the request timeout when making calls to the Collos API.
+    request_timeout="1s"
+
+
+    # LoRa Cloud backend.
+    #
+    # Please see https://www.loracloud.com/ for more information about this
+    # geolocation service.
+    [geo_server.backend.lora_cloud]
+    # API URI.
+    #
+    # The URI of the Geolocation API. This URI can be found under
+    # 'Token Management'.
+    uri=""
+
+    # API token.
+    token=""
+
+    # Request timeout.
+    #
+    # This defines the request timeout when making calls to the LoRa Cloud API.
+    request_timeout="1s"
+
+
+# Prometheus metrics settings.
+[metrics.prometheus]
+# Enable Prometheus metrics endpoint.
+endpoint_enabled=false
+
+# The ip:port to bind the Prometheus metrics server to for serving the
+# metrics endpoint.
+bind=""
+
+# API timing histogram.
+#
+# By setting this to true, the API request timing histogram will be enabled.
+# See also: https://github.com/grpc-ecosystem/go-grpc-prometheus#histograms
+api_timing_histogram=false
 {{< /highlight >}}
 
 ## Securing the geolocation API

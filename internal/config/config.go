@@ -28,8 +28,22 @@ type Config struct {
 				SubscriptionKey string        `mapstructure:"subscription_key"`
 				RequestTimeout  time.Duration `mapstructure:"request_timeout"`
 			} `mapstructure:"collos"`
+
+			LoRaCloud struct {
+				URI            string        `mapstructure:"uri"`
+				Token          string        `mapstructure:"token"`
+				RequestTimeout time.Duration `mapstructure:"request_timeout"`
+			} `mapstructure:"lora_cloud"`
 		} `mapstructure:"backend"`
 	} `mapstructure:"geo_server"`
+
+	Metrics struct {
+		Prometheus struct {
+			EndpointEnabled    bool   `mapstructure:"endpoint_enabled"`
+			Bind               string `mapstructure:"bind"`
+			APITimingHistogram bool   `mapstructure:"api_timing_histogram"`
+		} `mapstructure:"prometheus"`
+	} `mapstructure:"metrics"`
 }
 
 // C holds the global configufation.
