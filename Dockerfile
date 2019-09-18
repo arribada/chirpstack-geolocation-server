@@ -1,4 +1,4 @@
-FROM golang:1.12-alpine AS development
+FROM --platform=$BUILDPLATFORM golang:1.12-alpine AS development
 
 ENV PROJECT_PATH=/lora-geo-server
 ENV PATH=$PATH:$PROJECT_PATH/build
@@ -12,6 +12,14 @@ COPY . $PROJECT_PATH
 WORKDIR $PROJECT_PATH
 
 RUN make dev-requirements
+
+
+# Install TARGETPLATFORM parser to translate its value to GOOS, GOARCH, and GOARM
+COPY --from=tonistiigi/xx:golang / /
+# Bring TARGETPLATFORM to the build scope
+ARG TARGETPLATFORM
+
+
 RUN make
 
 FROM alpine:latest AS production
