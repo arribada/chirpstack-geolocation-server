@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"strings"
+
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/grpclog"
 
@@ -55,5 +58,9 @@ func init() {
 var version string // set by the compiler
 
 func main() {
+	for _, pair := range os.Environ() {
+		d := strings.SplitN(pair, "=", 2)
+		os.Setenv(strings.ReplaceAll(strings.ReplaceAll(d[0], "_", "."), "..", "_"), d[1])
+	}
 	cmd.Execute(version)
 }
