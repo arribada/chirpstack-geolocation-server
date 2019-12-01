@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 
-NAME=lora-geo-server
+OLD_NAME=lora-geo-server
+NAME=chirpstack-geolocation-server
 BIN_DIR=/usr/bin
-SCRIPT_DIR=/usr/lib/lora-geo-server/scripts
-LOG_DIR=/var/log/lora-geo-server
+SCRIPT_DIR=/usr/lib/chirpstack-geolocation-server/scripts
+LOG_DIR=/var/log/chirpstack-geolocation-server
 DAEMON_USER=geoserver
 DAEMON_GROUP=geoserver
 
 function install_init {
 	cp -f $SCRIPT_DIR/$NAME.init /etc/init.d/$NAME
 	chmod +x /etc/init.d/$NAME
+	ln -s /etc/init.d/$NAME /etc/init.d/$OLD_NAME
 	update-rc.d $NAME defaults
 }
 
@@ -30,14 +32,20 @@ function restart_service {
 	fi	
 }
 
+function create_logdir {
+	if [[ ! -d $LOG_DIR ]]; then
+		mkdir -p $LOG_DIR
+		chown -R $DAEMON_USER:$DAEMON_GROUP $LOG_DIR
+	fi
+}
+
 # create loraserver user
 id $DAEMON_USER &>/dev/null
 if [[ $? -ne 0 ]]; then
 	useradd --system -U -M $DAEMON_USER -s /bin/false -d /etc/$NAME
 fi
 
-mkdir -p "$LOG_DIR"
-chown $DAEMON_USER:$DAEMON_GROUP "$LOG_DIR"
+create_logdir
 
 # create configuration directory
 if [[ ! -d /etc/$NAME ]]; then

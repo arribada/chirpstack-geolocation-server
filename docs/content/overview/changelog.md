@@ -5,10 +5,21 @@ menu:
         parent: overview
         weight: 3
 toc: false
-description: Lists the changes per LoRa Geo Server release, including steps how to upgrade.
+description: Lists the changes per ChirpStack Geolocation Server release, including steps how to upgrade.
 ---
 
 # Changelog
+
+## v3.3.1
+
+### Bugfixes
+
+* Fixes init stop script which could cause the ChirpStack Geolocation Server to not properly stop or restart.
+
+## v3.3.0
+
+This release renames LoRa Geo Server to ChirpStack Geolocation Server.
+See the [Rename Announcement](https://www.chirpstack.io/r/rename-announcement) for more information.
 
 ## v3.2.0
 

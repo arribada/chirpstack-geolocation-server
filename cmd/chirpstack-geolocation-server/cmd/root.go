@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"strings"
 	"time"
@@ -11,18 +12,18 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/brocaar/lora-geo-server/internal/config"
+	"github.com/brocaar/chirpstack-geolocation-server/internal/config"
 )
 
 var cfgFile string
 var version string
 
 var rootCmd = &cobra.Command{
-	Use:   "lora-geo-server",
-	Short: "LoRa Geo Server for LoRa Server",
-	Long: `LoRa Geo Server provides geolocation services for LoRa Server
-	> documentation & support: https://www.loraserver.io/lora-geo-server/
-	> source & copyright information: https://github.com/brocaar/lora-geo-server/`,
+	Use:   "chirpstack-geolocation-server",
+	Short: "ChirpStack Geolocation Server",
+	Long: `ChirpStack Geolocation Server is an open-source Geolocation Server, part of the ChirpStack LoRaWAN Network Server stack.
+	> documentation & support: https://www.chirpstack.io/geolocation-server/
+	> source & copyright information: https://github.com/brocaar/chirpstack-geolocation-server/`,
 	RunE: run,
 }
 
@@ -67,16 +68,28 @@ func initConfig() {
 			log.WithError(err).WithField("config", cfgFile).Fatal("error loading config file")
 		}
 	} else {
-		viper.SetConfigName("lora-geo-server")
+		viper.SetConfigName("chirpstack-geolocation-server")
 		viper.AddConfigPath(".")
-		viper.AddConfigPath("$HOME/.config/lora-geo-server")
-		viper.AddConfigPath("/etc/lora-geo-server")
+		viper.AddConfigPath("$HOME/.config/chirpstack-geolocation-server")
+		viper.AddConfigPath("/etc/chirpstack-geolocation-server")
 		if err := viper.ReadInConfig(); err != nil {
 			switch err.(type) {
 			case viper.ConfigFileNotFoundError:
-				log.Warning("No configuration file found, using defaults. See: https://www.loraserver.io/lora-geo-server/install/config/")
+				log.Warning("No configuration file found, using defaults. See: https://www.chirpstack.io/geolocation-server/install/config/")
 			default:
 				log.WithError(err).Fatal("read configuration file error")
+			}
+		}
+	}
+
+	for _, pair := range os.Environ() {
+		d := strings.SplitN(pair, "=", 2)
+		if strings.Contains(d[0], ".") {
+			log.Warning("Using dots in env variable is illegal and deprecated. Please use double underscore `__` for: ", d[0])
+			underscoreName := strings.ReplaceAll(d[0], ".", "__")
+			// Set only when the underscore version doesn't already exist.
+			if _, exists := os.LookupEnv(underscoreName); !exists {
+				os.Setenv(underscoreName, d[1])
 			}
 		}
 	}
@@ -106,8 +119,11 @@ func viperBindEnvs(iface interface{}, parts ...string) {
 		case reflect.Struct:
 			viperBindEnvs(v.Interface(), append(parts, tv)...)
 		default:
-			key := strings.Join(append(parts, tv), ".")
-			viper.BindEnv(key)
+			// Bash doesn't allow env variable names with a dot so
+			// bind the double underscore version.
+			keyDot := strings.Join(append(parts, tv), ".")
+			keyUnderscore := strings.Join(append(parts, tv), "__")
+			viper.BindEnv(keyDot, strings.ToUpper(keyUnderscore))
 		}
 	}
 }
