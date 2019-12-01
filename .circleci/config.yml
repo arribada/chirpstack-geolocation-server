@@ -1,27 +1,4 @@
-version: 2
-jobs:
-  test:
-    machine:
-      image: circleci/classic:latest
-
-    steps:
-      - checkout
-      - run:
-          name: run tests
-          command: docker-compose run --rm chirpstack-geolocation-server make test
-
-  deploy:
-    machine:
-      image: circleci/classic:latest
-
-    steps:
-      - checkout
-      - run:
-          name: compile distributable binaries
-          command: docker-compose run --rm chirpstack-geolocation-server make dist
-      - run:
-          name: upload binaries to s3
-          command: aws s3 sync dist/upload s3://builds.loraserver.io/chirpstack-geolocation-server
+version: 2.1
 
 orbs:
   docker: arribada/docker@0.0.12
